@@ -1,0 +1,16 @@
+{
+    "test_suites": [
+        {
+            "name": "standard_mini_lm",
+            "ingestion_config": "configs/ingestion_minilm.json",
+            "query_config": "configs/query_minilm.json",
+            "data_file": "data/sample_products.json"
+        },
+        {
+            "name": "multilingual_e5",
+            "ingestion_config": "configs/ingestion_e5_ml.json",
+            "query_config": "configs/query_e5_ml.json",
+            "data_file": "data/sample_products.json"
+        }
+    ]
+}

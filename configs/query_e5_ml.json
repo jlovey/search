@@ -1,0 +1,46 @@
+{
+    "collection_name": "product_search_e5_multilingual",
+    "dense_model": "intfloat/multilingual-e5-base",
+    "dense_prefix": "query: ",
+    "sparse_model_path": "models/sparse_model.pkl",
+    "queries": [
+        {
+            "name": "e5_pure_dense_search",
+            "type": "dense",
+            "query_text": "Monopoly game for kids",
+            "limit": 5
+        },
+        {
+            "name": "e5_pure_sparse_search",
+            "type": "sparse",
+            "query_text": "Hasbro Monopoly",
+            "limit": 5
+        },
+        {
+            "name": "e5_hybrid_search",
+            "type": "hybrid",
+            "query_text": "board games for 4 years old",
+            "limit": 5,
+            "hybrid_config": {
+                "dense_weight": 0.5,
+                "sparse_weight": 0.5
+            }
+        },
+        {
+            "name": "e5_filtered_hybrid_search",
+            "type": "hybrid",
+            "query_text": "toy games",
+            "filter": {
+                "must": [
+                    {
+                        "key": "brands",
+                        "match": {
+                            "value": "Monopoly"
+                        }
+                    }
+                ]
+            },
+            "limit": 3
+        }
+    ]
+}

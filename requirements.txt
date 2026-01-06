@@ -1,0 +1,9 @@
+qdrant-client
+pydantic
+python-dotenv
+scikit-learn
+numpy
+pandas
+sentence-transformers
+tqdm
+pytest

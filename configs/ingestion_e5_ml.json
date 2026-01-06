@@ -1,0 +1,25 @@
+{
+    "collection_name": "product_search_e5_multilingual",
+    "dense_model": "intfloat/multilingual-e5-base",
+    "dense_prefix": "passage: ",
+    "vector_size": 768,
+    "dense_keys": [
+        "features",
+        "productName",
+        "productDescription",
+        "categoryNames"
+    ],
+    "sparse_keys": [
+        "features",
+        "productName",
+        "productDescription",
+        "categoryNames"
+    ],
+    "filter_keys": [
+        "brands",
+        "ageRanges",
+        "categoryNames"
+    ],
+    "sparse_model": "bm25_tfidf",
+    "response_keys": "all"
+}

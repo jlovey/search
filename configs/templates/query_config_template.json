@@ -1,0 +1,25 @@
+{
+    "collection_name": "YOUR_COLLECTION_NAME",
+    "dense_model": "MODEL_NAME_FROM_HUGGINGFACE",
+    "dense_prefix": "OPTIONAL_GLOBAL_PREFIX_E_G_QUERY_FOR_E5",
+    "sparse_model_path": "models/sparse_model.pkl",
+    "queries": [
+        {
+            "name": "query_name",
+            "type": "hybrid",
+            "query_text": "your search text",
+            "dense_prefix": "OPTIONAL_PER_QUERY_PREFIX",
+            "limit": 5,
+            "filter": {
+                "must": [
+                    {
+                        "key": "field",
+                        "match": {
+                            "value": "value"
+                        }
+                    }
+                ]
+            }
+        }
+    ]
+}

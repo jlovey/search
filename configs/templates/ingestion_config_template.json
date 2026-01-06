@@ -1,0 +1,19 @@
+{
+    "collection_name": "YOUR_COLLECTION_NAME",
+    "dense_model": "MODEL_NAME_FROM_HUGGINGFACE",
+    "dense_prefix": "OPTIONAL_PREFIX_E_G_PASSAGE_FOR_E5",
+    "vector_size": 384,
+    "dense_keys": [
+        "key1",
+        "key2"
+    ],
+    "sparse_keys": [
+        "key1",
+        "key2"
+    ],
+    "filter_keys": [
+        "key3"
+    ],
+    "sparse_model": "bm25_tfidf",
+    "response_keys": "all"
+}

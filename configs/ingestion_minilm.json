@@ -1,0 +1,24 @@
+{
+    "collection_name": "product_search_collection",
+    "dense_keys": [
+        "features",
+        "productName",
+        "productDescription",
+        "categoryNames"
+    ],
+    "sparse_keys": [
+        "features",
+        "productName",
+        "productDescription",
+        "categoryNames"
+    ],
+    "filter_keys": [
+        "brands",
+        "ageRanges",
+        "categoryNames"
+    ],
+    "dense_model": "all-MiniLM-L6-v2",
+    "sparse_model": "bm25_tfidf",
+    "response_keys": "all",
+    "vector_size": 384
+}
