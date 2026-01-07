@@ -8,6 +8,15 @@ This project implements a professional, full-fledged search application using Qd
 - **Config-Driven Ingestion**: Define which fields to embed and filter via JSON.
 - **Flexible Retrieval**: Supports pure dense, pure sparse, and hybrid search modes.
 - **RRF Fusion**: Intelligently merges results from different retrieval methods.
+- **Score Normalization**: All search results (Dense, Sparse, Hybrid) are normalized to a consistent `[0, 1]` range for easy comparison.
+
+## Scoring & Normalization
+
+The pipeline implements a dedicated normalization layer in the `BaseRetriever` to make scores intuitive and comparable:
+
+1.  **Dense & Sparse**: Uses **Min-Max scaling** on the raw similarity scores within each result set. This maps the results into a `[0, 1]` range relative to the top performer of that specific query.
+2.  **Hybrid (RRF)**: Reciprocal Rank Fusion scores are normalized by dividing the total rank-score by the theoretical maximum for a 2-stream search (`~0.0327`). 
+3.  **Transparency**: The `retrieval_orchestrator` outputs both the **Normalized Score** (for business logic/thresholds) and the **Raw Score** (for debugging and technical analysis).
 
 ## Project Structure
 
