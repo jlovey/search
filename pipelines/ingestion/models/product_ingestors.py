@@ -1,3 +1,4 @@
+import hashlib
 import json
 import os
 import sys
@@ -17,6 +18,12 @@ class BaseIngestor:
         self.qdrant = QdrantHelper()
         self.embedder = EmbeddingService(config["dense_model"])
     
+    @staticmethod
+    def get_numeric_id(pid, suffix):
+        # Create a stable 64-bit integer from the string
+        identifier = f"{pid}_{suffix}"
+        return int(hashlib.md5(identifier.encode()).hexdigest()[:15], 16)
+
     def prepare_points(self, products):
         raise NotImplementedError("Subclasses must implement prepare_points")
 
@@ -63,12 +70,12 @@ class MiniLMIngestor(BaseIngestor):
             payload["original_id"] = pid
             
             dense_points.append(q_models.PointStruct(
-                id=str(uuid.uuid5(uuid.NAMESPACE_DNS, pid + "_dense")),
+                id=self.get_numeric_id(pid, "dense"),
                 vector=dense_vec,
                 payload={**payload, "vector_type": "dense"}
             ))
             sparse_points.append(q_models.PointStruct(
-                id=str(uuid.uuid5(uuid.NAMESPACE_DNS, pid + "_sparse")),
+                id=self.get_numeric_id(pid, "sparse"),
                 vector={"sparse-vector": sparse_vec},
                 payload={**payload, "vector_type": "sparse"}
             ))
@@ -92,12 +99,12 @@ class E5MLIngestor(BaseIngestor):
             payload["original_id"] = pid
             
             dense_points.append(q_models.PointStruct(
-                id=str(uuid.uuid5(uuid.NAMESPACE_DNS, pid + "_dense")),
+                id=self.get_numeric_id(pid, "dense"),
                 vector=dense_vec,
                 payload={**payload, "vector_type": "dense"}
             ))
             sparse_points.append(q_models.PointStruct(
-                id=str(uuid.uuid5(uuid.NAMESPACE_DNS, pid + "_sparse")),
+                id=self.get_numeric_id(pid, "sparse"),
                 vector={"sparse-vector": sparse_vec},
                 payload={**payload, "vector_type": "sparse"}
             ))
