@@ -1,6 +1,18 @@
 import hashlib
+import re
 
 class EnrichmentService:
+    @staticmethod
+    def _clean_html(text):
+        """Removes HTML tags and normalizes whitespace."""
+        if not text:
+            return ""
+        # Remove HTML tags
+        clean = re.sub(r'<[^>]+>', ' ', text)
+        # Normalize whitespace
+        clean = re.sub(r'\s+', ' ', clean).strip()
+        return clean
+
     @staticmethod
     def enrich_sparse(doc, keys):
         """Extracts and lowercases content from specified keys in a dict for sparse vectors."""
@@ -8,9 +20,9 @@ class EnrichmentService:
         for key in keys:
             val = doc.get(key, "")
             if isinstance(val, list):
-                values.extend([str(v).lower() for v in val])
+                values.extend([EnrichmentService._clean_html(str(v)).lower() for v in val])
             else:
-                values.append(str(val).lower())
+                values.append(EnrichmentService._clean_html(str(val)).lower())
         return " ".join(values)
 
     @staticmethod
@@ -20,8 +32,8 @@ class EnrichmentService:
         name_key = "productName"
         desc_key = "productDescription"
         
-        name = str(doc.get(name_key, "")).strip()
-        desc = str(doc.get(desc_key, "")).strip()
+        name = EnrichmentService._clean_html(str(doc.get(name_key, "")))
+        desc = EnrichmentService._clean_html(str(doc.get(desc_key, "")))
         
         markdown = []
         if name:
@@ -37,9 +49,9 @@ class EnrichmentService:
                 val = doc.get(key)
                 if val:
                     if isinstance(val, list):
-                        val_str = ", ".join([str(v) for v in val])
+                        val_str = ", ".join([EnrichmentService._clean_html(str(v)) for v in val])
                     else:
-                        val_str = str(val)
+                        val_str = EnrichmentService._clean_html(str(val))
                     others.append(f"{key}: {val_str}")
             
             if others:
