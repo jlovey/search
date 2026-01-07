@@ -10,14 +10,47 @@ This project implements a professional, full-fledged search application using Qd
 - **RRF Fusion**: Intelligently merges results from different retrieval methods.
 
 ## Project Structure
-- `src/services/`: Core logic for `Qdrant` and metrics.
-- `models/`: Embedding logic and persistent model storage.
-- `pipelines/ingestion/models/`: Model-specific indexing logic (MiniLM, E5, etc.).
-- `pipelines/retrieval/models/`: Model-specific search and reranking logic.
-- `pipelines/ingestion/ingestion_orchestrator.py`: Entry point for indexing.
-- `pipelines/retrieval/retrieval_orchestrator.py`: Entry point for search.
-- `configs/`: Centralized configuration for ingestion and queries.
-- `data/`: Sample product datasets.
+
+```text
+search/
+├── configs/                     # Centralized Model & Query Configurations
+│   ├── ingestion_minilm.json    # MiniLM Specific Ingestion Settings
+│   ├── query_minilm.json        # MiniLM Specific Query Scenarios (Dense, Sparse, Hybrid)
+│   ├── ingestion_e5_ml.json     # Multilingual E5 Ingestion Settings
+│   ├── query_e5_ml.json         # Multilingual E5 Query Scenarios
+│   └── templates/               # Reusable config templates for new models
+├── pipelines/                   # Core Logic & Orchestration
+│   ├── ingestion/               
+│   │   ├── models/              # Model-specific Indexing Logic
+│   │   │   └── product_ingestors.py
+│   │   └── ingestion_orchestrator.py # Entry point for data indexing
+│   └── retrieval/               
+│       ├── models/              # Model-specific Search & Reranking Logic
+│       │   └── product_retrievers.py
+│       ├── retrieval_orchestrator.py # Entry point for search execution
+│       └── cleanup_collection.py     # Utility to purge Qdrant collections
+├── src/                         # Shared Application Core
+│   ├── services/                
+│   │   ├── qdrant_service.py    # Low-level Qdrant Client Wrapper
+│   │   └── metrics_service.py   # Accuracy & Evaluation Metrics
+│   └── schema/                  # Pydantic Data Models
+├── models/                      # ML & Embedding logic
+│   ├── embedding_service.py     # Shared Vectorization logic (MiniLM, E5, TF-IDF)
+│   └── sparse_model.pkl         # Persisted TF-IDF vocabulary
+├── tests/                       # Automated Testing Suite
+│   ├── scripts/                 # Pytest scenarios (Full Cycle vs No-Cleanup)
+│   └── configs/                 # Master Test runtime configuration
+├── data/                        # Sample product datasets (JSON)
+├── ReadMe.md                    # Project Documentation
+└── requirements.txt             # Python Dependencies
+```
+
+### **Core Component Descriptions**
+
+*   **`configs/`**: The "brain" of the project where you manage vector dimensions, model-specific prefixes (e.g., `passage:` for E5), and search thresholds.
+*   **`pipelines/`**: Implements the orchestration pattern. It dynamically routes requests to model-specific logic, ensuring internal changes to one model don't affect others.
+*   **`src/services/`**: Infrastructure layer handling Qdrant interactions and search performance metrics.
+*   **`tests/`**: Robust suite of 5 test scenarios for verifying pipeline integrity across different model deployments.
 
 ## Setup
 
