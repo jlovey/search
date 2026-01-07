@@ -40,23 +40,30 @@ class BaseRetriever:
         } for pid, score in sorted_scores[:limit]]
 
     def search(self, q_config):
-        raise NotImplementedError("Subclasses must implement search")
-
-class MiniLMRetriever(BaseRetriever):
-    def search(self, q_config):
-        return self._execute(q_config, prefix="")
-
-    def _execute(self, q_config, prefix):
+        """Standard search implementation that handles dense, sparse, and hybrid."""
         query_text = q_config["query_text"]
         limit = q_config.get("limit", 5)
         search_type = q_config["type"]
+        score_threshold = q_config.get("score_threshold")
         col = self.config["collection_name"]
+        
+        # Get prefix if it's an E5 style model
+        prefix = q_config.get("dense_prefix") or self.config.get("dense_prefix", "")
+
+        # Prepare Filters
+        must_filters = [{"key": "vector_type", "match": {"value": "dense" if search_type == "dense" else "sparse"}}]
+        if q_config.get("filter"):
+            must_filters.extend(q_config["filter"].get("must", []))
+        
+        q_filter = q_models.Filter(must=must_filters)
 
         if search_type == "dense":
             vec = self.embedder.get_dense_embeddings([query_text], prefix=prefix)[0]
             hits = self.qdrant.client.query_points(
-                collection_name=col, query=vec, 
-                query_filter=q_models.Filter(must=[{"key": "vector_type", "match": {"value": "dense"}}]),
+                collection_name=col, 
+                query=vec, 
+                query_filter=q_filter,
+                score_threshold=score_threshold,
                 limit=limit
             ).points
             return [{"id": h.id, "score": h.score, "name": h.payload.get("productName"), "original_id": h.payload.get("original_id")} for h in hits]
@@ -67,47 +74,39 @@ class MiniLMRetriever(BaseRetriever):
                 collection_name=col,
                 query=q_models.SparseVector(indices=sparse_data["indices"], values=sparse_data["values"]),
                 using="sparse-vector",
-                query_filter=q_models.Filter(must=[{"key": "vector_type", "match": {"value": "sparse"}}]),
+                query_filter=q_filter,
+                score_threshold=score_threshold,
                 limit=limit
             ).points
             return [{"id": h.id, "score": h.score, "name": h.payload.get("productName"), "original_id": h.payload.get("original_id")} for h in hits]
 
         elif search_type == "hybrid":
-            dense_hits = self.qdrant.client.query_points(col, query=self.embedder.get_dense_embeddings([query_text], prefix=prefix)[0], 
-                                                        query_filter=q_models.Filter(must=[{"key":"vector_type", "match":{"value":"dense"}}]), limit=limit*2).points
+            # For Hybrid, we currently use RRF which happens on the client side.
+            # score_threshold applies to the individual searches.
+            
+            # 1. Dense Search
+            dense_vec = self.embedder.get_dense_embeddings([query_text], prefix=prefix)[0]
+            dense_filter = q_models.Filter(must=[{"key": "vector_type", "match": {"value": "dense"}}] + (q_config.get("filter", {}).get("must", [])))
+            dense_hits = self.qdrant.client.query_points(
+                col, query=dense_vec, query_filter=dense_filter, score_threshold=score_threshold, limit=limit*2
+            ).points
+
+            # 2. Sparse Search
             sparse_data = self.embedder.get_sparse_embeddings([query_text])[0]
-            sparse_hits = self.qdrant.client.query_points(col, query=q_models.SparseVector(indices=sparse_data["indices"], values=sparse_data["values"]),
-                                                         using="sparse-vector", query_filter=q_models.Filter(must=[{"key":"vector_type", "match":{"value":"sparse"}}]), limit=limit*2).points
-            # Potential specializing for MiniLM here
+            sparse_filter = q_models.Filter(must=[{"key": "vector_type", "match": {"value": "sparse"}}] + (q_config.get("filter", {}).get("must", [])))
+            sparse_hits = self.qdrant.client.query_points(
+                col, 
+                query=q_models.SparseVector(indices=sparse_data["indices"], values=sparse_data["values"]),
+                using="sparse-vector", 
+                query_filter=sparse_filter, 
+                score_threshold=score_threshold,
+                limit=limit*2
+            ).points
+            
             return self.reciprocal_rank_fusion(dense_hits, sparse_hits, limit=limit)
+
+class MiniLMRetriever(BaseRetriever):
+    pass
 
 class E5MLRetriever(BaseRetriever):
-    def search(self, q_config):
-        prefix = q_config.get("dense_prefix") or self.config.get("dense_prefix", "query: ")
-        return self._execute(q_config, prefix=prefix)
-
-    def _execute(self, q_config, prefix):
-        query_text = q_config["query_text"]
-        limit = q_config.get("limit", 5)
-        search_type = q_config["type"]
-        col = self.config["collection_name"]
-
-        if search_type == "dense":
-            vec = self.embedder.get_dense_embeddings([query_text], prefix=prefix)[0]
-            hits = self.qdrant.client.query_points(col, query=vec, query_filter=q_models.Filter(must=[{"key":"vector_type", "match":{"value":"dense"}}]), limit=limit).points
-            return [{"id": h.id, "score": h.score, "name": h.payload.get("productName"), "original_id": h.payload.get("original_id")} for h in hits]
-
-        elif search_type == "sparse":
-            sparse_data = self.embedder.get_sparse_embeddings([query_text])[0]
-            hits = self.qdrant.client.query_points(col, query=q_models.SparseVector(indices=sparse_data["indices"], values=sparse_data["values"]),
-                                                 using="sparse-vector", query_filter=q_models.Filter(must=[{"key":"vector_type", "match":{"value":"sparse"}}]), limit=limit).points
-            return [{"id": h.id, "score": h.score, "name": h.payload.get("productName"), "original_id": h.payload.get("original_id")} for h in hits]
-
-        elif search_type == "hybrid":
-            dense_hits = self.qdrant.client.query_points(col, query=self.embedder.get_dense_embeddings([query_text], prefix=prefix)[0], 
-                                                        query_filter=q_models.Filter(must=[{"key":"vector_type", "match":{"value":"dense"}}]), limit=limit*2).points
-            sparse_data = self.embedder.get_sparse_embeddings([query_text])[0]
-            sparse_hits = self.qdrant.client.query_points(col, query=q_models.SparseVector(indices=sparse_data["indices"], values=sparse_data["values"]),
-                                                         using="sparse-vector", query_filter=q_models.Filter(must=[{"key":"vector_type", "match":{"value":"sparse"}}]), limit=limit*2).points
-            # Potential specializing for E5-ML here (e.g. better reranking)
-            return self.reciprocal_rank_fusion(dense_hits, sparse_hits, limit=limit)
+    pass

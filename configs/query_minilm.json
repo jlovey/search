@@ -40,6 +40,13 @@
                 ]
             },
             "limit": 3
+        },
+        {
+            "name": "threshold_dense_search",
+            "type": "dense",
+            "query_text": "Monopoly game for kids",
+            "score_threshold": 0.4,
+            "limit": 5
         }
     ]
 }
