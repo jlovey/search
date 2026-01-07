@@ -53,9 +53,32 @@ python pipelines/retrieval/cleanup_collection.py
 ```
 
 ### 4. Testing
-Run the automated test suite across all configured models.
+We provide 5 dedicated test scenarios to verify different parts of the pipeline using `pytest`.
+
+#### Run All Suites
+Execute the complete lifecycle for all configured models (MiniLM and E5).
 ```bash
-pytest -v -s tests/scripts/test_search_pipeline.py
+pytest -v -s tests/scripts/full_test_cycle.py
+```
+
+#### Model-Specific Full Cycles
+Verify a full scenario (Purge → Index → Search → Cleanup) for a single model.
+```bash
+# MiniLM + BM25
+pytest -v -s tests/scripts/test_mini_lm_full_cycle.py
+
+# Multilingual E5 + BM25
+pytest -v -s tests/scripts/test_e5_ml_full_cycle.py
+```
+
+#### Persistent Tests (No Cleanup)
+Index and Query but skip the final deletion. Use this to inspect the data in Qdrant afterward.
+```bash
+# Keep MiniLM data
+pytest -v -s tests/scripts/test_mini_lm_no_cleanup.py
+
+# Keep E5 data
+pytest -v -s tests/scripts/test_e5_ml_no_cleanup.py
 ```
 
 ## Configuration
