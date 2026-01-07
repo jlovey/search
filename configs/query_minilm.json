@@ -1,5 +1,5 @@
 {
-    "collection_name": "product_search_collection",
+    "collection_name": "prd_minilm_l6v2_bm25_tfidf",
     "dense_model": "all-MiniLM-L6-v2",
     "sparse_model_path": "models/sparse_model.pkl",
     "queries": [

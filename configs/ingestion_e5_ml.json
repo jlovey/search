@@ -1,5 +1,5 @@
 {
-    "collection_name": "product_search_e5_multilingual",
+    "collection_name": "prd_e5_ml_bm25_tfidf",
     "dense_model": "intfloat/multilingual-e5-base",
     "dense_prefix": "passage: ",
     "vector_size": 768,
