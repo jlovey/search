@@ -34,10 +34,14 @@ def run_retrieval(config_path):
         results = retriever.search(q_config)
         
         for r in results:
-            if q_config["type"] == "hybrid":
-                print(f" - [{r['product_id']}] {r['productName']} (RRF Score: {r['rrf_score']:.4f})")
-            else:
-                print(f" - [{r['original_id']}] {r['name']} (Score: {r['score']:.4f})")
+            # Shared identifiers
+            pid = r.get('product_id') or r.get('original_id')
+            pname = r.get('productName') or r.get('name')
+            score = r['score']
+            raw = r['raw_score']
+            
+            label = "RRF" if q_config["type"] == "hybrid" else "Sim"
+            print(f" - [{pid}] {pname} (Score: {score:.4f}, Raw {label}: {raw:.4f})")
         
         if not results:
             print(" - No results found.")

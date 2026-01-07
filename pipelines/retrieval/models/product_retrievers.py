@@ -18,6 +18,11 @@ class BaseRetriever:
 
     def reciprocal_rank_fusion(self, dense_hits, sparse_hits, limit=10):
         scores = {}
+        # Max possible RRF score for 2 streams is (1/61 + 1/61) = 0.032786
+        # We use this to normalize RRF to [0, 1]
+        MAX_RRF_SINGLE = 1 / 61.0
+        MAX_RRF_TOTAL = MAX_RRF_SINGLE * 2
+
         def get_item_id(hit):
             return hit.payload.get("original_id")
 
@@ -32,12 +37,42 @@ class BaseRetriever:
         sorted_scores = sorted(scores.items(), key=lambda x: x[1], reverse=True)
         all_payloads = {get_item_id(h): h.payload for h in dense_hits + sparse_hits}
         
-        return [{
-            "product_id": pid,
-            "productName": all_payloads[pid].get("productName"),
-            "rrf_score": score,
-            "metadata": all_payloads[pid]
-        } for pid, score in sorted_scores[:limit]]
+        results = []
+        for pid, score in sorted_scores[:limit]:
+            norm_score = min(1.0, score / MAX_RRF_TOTAL)
+            results.append({
+                "product_id": pid,
+                "productName": all_payloads[pid].get("productName"),
+                "raw_score": score,
+                "score": norm_score, # Normalized score
+                "metadata": all_payloads[pid]
+            })
+        return results
+
+    def _normalize_hits(self, hits):
+        """Helper to normalize raw scores of a hit list to [0, 1] range."""
+        if not hits:
+            return []
+        
+        raw_scores = [h.score for h in hits]
+        # If all scores are the same, return 1.0 for all
+        if len(raw_scores) == 1 or max(raw_scores) == min(raw_scores):
+            return [{"id": h.id, "score": 1.0, "raw_score": h.score, "name": h.payload.get("productName"), "original_id": h.payload.get("original_id")} for h in hits]
+        
+        min_s = min(raw_scores)
+        max_s = max(raw_scores)
+        
+        results = []
+        for h in hits:
+            norm_score = (h.score - min_s) / (max_s - min_s)
+            results.append({
+                "id": h.id,
+                "score": round(norm_score, 4),
+                "raw_score": h.score,
+                "name": h.payload.get("productName"),
+                "original_id": h.payload.get("original_id")
+            })
+        return results
 
     def search(self, q_config):
         """Standard search implementation that handles dense, sparse, and hybrid."""
@@ -66,7 +101,7 @@ class BaseRetriever:
                 score_threshold=score_threshold,
                 limit=limit
             ).points
-            return [{"id": h.id, "score": h.score, "name": h.payload.get("productName"), "original_id": h.payload.get("original_id")} for h in hits]
+            return self._normalize_hits(hits)
 
         elif search_type == "sparse":
             sparse_data = self.embedder.get_sparse_embeddings([query_text])[0]
@@ -78,12 +113,9 @@ class BaseRetriever:
                 score_threshold=score_threshold,
                 limit=limit
             ).points
-            return [{"id": h.id, "score": h.score, "name": h.payload.get("productName"), "original_id": h.payload.get("original_id")} for h in hits]
+            return self._normalize_hits(hits)
 
         elif search_type == "hybrid":
-            # For Hybrid, we currently use RRF which happens on the client side.
-            # score_threshold applies to the individual searches.
-            
             # 1. Dense Search
             dense_vec = self.embedder.get_dense_embeddings([query_text], prefix=prefix)[0]
             dense_filter = q_models.Filter(must=[{"key": "vector_type", "match": {"value": "dense"}}] + (q_config.get("filter", {}).get("must", [])))
