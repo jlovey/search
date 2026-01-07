@@ -10,6 +10,7 @@ from qdrant_client.http import models as q_models
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 from src.services.qdrant_service import QdrantHelper
+from src.services.enrichment_service import EnrichmentService
 from models.embedding_service import EmbeddingService
 
 class BaseIngestor:
@@ -34,7 +35,7 @@ class BaseIngestor:
         print(f"Loaded {len(products)} products from {data_file}")
         
         # Fit sparse model
-        all_text = [EmbeddingService.flatten_content(p, self.config["sparse_keys"]) for p in products]
+        all_text = [EnrichmentService.enrich_sparse(p, self.config["sparse_keys"]) for p in products]
         self.embedder.fit_sparse_model(all_text)
         self.embedder.save_sparse_model("models/sparse_model.pkl")
 
@@ -59,8 +60,8 @@ class MiniLMIngestor(BaseIngestor):
         sparse_points = []
         for i, product in enumerate(tqdm(products, desc="Vectorizing MiniLM")):
             pid = str(product.get("id", i))
-            dense_content = EmbeddingService.flatten_content(product, self.config["dense_keys"])
-            sparse_content = EmbeddingService.flatten_content(product, self.config["sparse_keys"])
+            dense_content = EnrichmentService.enrich_dense(product, self.config["dense_keys"])
+            sparse_content = EnrichmentService.enrich_sparse(product, self.config["sparse_keys"])
             
             # MiniLM logic: No prefix
             dense_vec = self.embedder.get_dense_embeddings([dense_content])[0]
@@ -88,8 +89,8 @@ class E5MLIngestor(BaseIngestor):
         prefix = self.config.get("dense_prefix", "passage: ")
         for i, product in enumerate(tqdm(products, desc="Vectorizing E5-ML")):
             pid = str(product.get("id", i))
-            dense_content = EmbeddingService.flatten_content(product, self.config["dense_keys"])
-            sparse_content = EmbeddingService.flatten_content(product, self.config["sparse_keys"])
+            dense_content = EnrichmentService.enrich_dense(product, self.config["dense_keys"])
+            sparse_content = EnrichmentService.enrich_sparse(product, self.config["sparse_keys"])
             
             # E5 Logic: Use prefix
             dense_vec = self.embedder.get_dense_embeddings([dense_content], prefix=prefix)[0]

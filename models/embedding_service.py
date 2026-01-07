@@ -52,14 +52,3 @@ class EmbeddingService:
             
         return sparse_results
 
-    @staticmethod
-    def flatten_content(doc, keys):
-        """Extracts and lowercases content from specified keys in a dict."""
-        values = []
-        for key in keys:
-            val = doc.get(key, "")
-            if isinstance(val, list):
-                values.extend([str(v).lower() for v in val])
-            else:
-                values.append(str(val).lower())
-        return " ".join(values)

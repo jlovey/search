@@ -9,6 +9,7 @@ This project implements a professional, full-fledged search application using Qd
 - **Flexible Retrieval**: Supports pure dense, pure sparse, and hybrid search modes.
 - **RRF Fusion**: Intelligently merges results from different retrieval methods.
 - **Score Normalization**: All search results (Dense, Sparse, Hybrid) are normalized to a consistent `[0, 1]` range for easy comparison.
+- **Enrichment Engine**: Modular preparation for dense (Markdown) and sparse (flattened) vectors.
 
 ## Scoring & Normalization
 
@@ -17,6 +18,24 @@ The pipeline implements a dedicated normalization layer in the `BaseRetriever` t
 1.  **Dense & Sparse**: Uses **Min-Max scaling** on the raw similarity scores within each result set. This maps the results into a `[0, 1]` range relative to the top performer of that specific query.
 2.  **Hybrid (RRF)**: Reciprocal Rank Fusion scores are normalized by dividing the total rank-score by the theoretical maximum for a 2-stream search (`~0.0327`). 
 3.  **Transparency**: The `retrieval_orchestrator` outputs both the **Normalized Score** (for business logic/thresholds) and the **Raw Score** (for debugging and technical analysis).
+
+## Enrichment Pipeline
+
+The system uses a dedicated `EnrichmentService` to prepare data for vectorization, ensuring the best possible retrieval performance:
+
+- **Dense Enrichment (Markdown formatting)**:
+  - Higher semantic quality for LLM-based dense models (MiniLM, E5).
+  - Automatically formats products into structured Markdown:
+    ```markdown
+    # [ProductName]
+    [ProductDescription]
+    ---
+    [Attribute]: [Value]
+    ```
+  - All content is lowercased to maintain embedding consistency and reduce noise.
+- **Sparse Enrichment (Flattening)**:
+  - Optimized for keyword-based search (BM25/TF-IDF).
+  - Flattens specified fields into a continuous, lowercase text stream for efficient tokenization and vocabulary mapping.
 
 ## Project Structure
 
@@ -41,6 +60,7 @@ search/
 ├── src/                         # Shared Application Core
 │   ├── services/                
 │   │   ├── qdrant_service.py    # Low-level Qdrant Client Wrapper
+│   │   ├── enrichment_service.py # Markdown & Flattening Logic
 │   │   └── metrics_service.py   # Accuracy & Evaluation Metrics
 │   └── schema/                  # Pydantic Data Models
 ├── models/                      # ML & Embedding logic
