@@ -4,14 +4,14 @@ import os
 import sys
 
 # Add project root to sys.path
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from pipelines.ingestion.advanced_pipeline import run_ingestion
-from pipelines.retrieval.advanced_retrieval import run_retrieval
+from pipelines.ingestion.ingestion_orchestrator import run_ingestion
+from pipelines.retrieval.retrieval_orchestrator import run_retrieval
 from pipelines.retrieval.cleanup_collection import run_cleanup
 
 def load_test_config():
-    config_path = "configs/test_runtime_config.json"
+    config_path = "tests/configs/test_runtime_config.json"
     with open(config_path, "r") as f:
         return json.load(f)
 

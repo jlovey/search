@@ -12,8 +12,10 @@ This project implements a professional, full-fledged search application using Qd
 ## Project Structure
 - `src/services/`: Core logic for `Qdrant` and metrics.
 - `models/`: Embedding logic and persistent model storage.
-- `ingestion/`: Pipeline for processing raw product JSON into Qdrant.
-- `pipelines/`: Advanced retrieval and cleanup utilities.
+- `pipelines/ingestion/models/`: Model-specific indexing logic (MiniLM, E5, etc.).
+- `pipelines/retrieval/models/`: Model-specific search and reranking logic.
+- `pipelines/ingestion/ingestion_orchestrator.py`: Entry point for indexing.
+- `pipelines/retrieval/retrieval_orchestrator.py`: Entry point for search.
 - `configs/`: Centralized configuration for ingestion and queries.
 - `data/`: Sample product datasets.
 
@@ -33,15 +35,15 @@ This project implements a professional, full-fledged search application using Qd
 ## Usage
 
 ### 1. Ingestion
-Process products and index them into Qdrant. This generates both dense and sparse representations.
+Process products and index them into Qdrant using the model-specific ingestors.
 ```bash
-python pipelines/ingestion/advanced_pipeline.py
+python pipelines/ingestion/ingestion_orchestrator.py
 ```
 
 ### 2. Retrieval
-Execute the query suite defined in `configs/advanced_query_config.json`.
+Execute queries using the model-specific retrievers.
 ```bash
-python pipelines/retrieval/advanced_retrieval.py
+python pipelines/retrieval/retrieval_orchestrator.py
 ```
 
 ### 3. Cleanup
@@ -50,9 +52,15 @@ Delete the collection when finished.
 python pipelines/retrieval/cleanup_collection.py
 ```
 
-## Configuration
+### 4. Testing
+Run the automated test suite across all configured models.
+```bash
+pytest -v -s tests/scripts/test_search_pipeline.py
+```
 
+## Configuration
 - `configs/ingestion_minilm.json`: Ingestion config for MiniLM model.
 - `configs/query_minilm.json`: Query config for MiniLM model.
 - `configs/ingestion_e5_ml.json`: Ingestion config for Multilingual E5 model.
 - `configs/query_e5_ml.json`: Query config for Multilingual E5 model.
+- `tests/configs/test_runtime_config.json`: Master configuration for automated tests.
