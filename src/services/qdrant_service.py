@@ -61,3 +61,9 @@ class QdrantHelper:
         else:
             with open(data_path, 'r', encoding='utf-8') as f:
                 return json.load(f)
+
+    def batch_upsert(self, collection_name, points, chunk_size=100):
+        """Uploads points in batches to avoid overwhelming the server."""
+        for i in range(0, len(points), chunk_size):
+            batch = points[i:i + chunk_size]
+            self.client.upsert(collection_name=collection_name, points=batch)

@@ -73,9 +73,9 @@ class BaseIngestor:
         # Prepare points for all products
         dense_points, sparse_points = self.prepare_points(all_products)
         
-        print(f"Uploading {len(dense_points)} dense and {len(sparse_points)} sparse points...")
-        self.qdrant.client.upsert(self.config["collection_name"], points=dense_points)
-        self.qdrant.client.upsert(self.config["collection_name"], points=sparse_points)
+        print(f"Uploading {len(dense_points)} dense and {len(sparse_points)} sparse points in batches...")
+        self.qdrant.batch_upsert(self.config["collection_name"], dense_points)
+        self.qdrant.batch_upsert(self.config["collection_name"], sparse_points)
         print("Ingestion complete.")
 
 class MiniLMIngestor(BaseIngestor):
