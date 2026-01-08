@@ -5,7 +5,7 @@ import sys
 # Add project root to path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from pipelines.ingestion.models.product_ingestors import MiniLMIngestor, E5MLIngestor
+from pipelines.ingestion.models.product_ingestors import MiniLMIngestor, GenericPrefixIngestor
 
 def run_ingestion(data_path, config_path):
     with open(config_path, 'r', encoding='utf-8') as f:
@@ -15,8 +15,12 @@ def run_ingestion(data_path, config_path):
     
     # Mapping of exact model names to their specialized ingestors
     INGESTOR_MAP = {
-        "intfloat/multilingual-e5-base": E5MLIngestor,
-        "all-MiniLM-L6-v2": MiniLMIngestor
+        "all-MiniLM-L6-v2": MiniLMIngestor,
+        "intfloat/multilingual-e5-base": GenericPrefixIngestor,
+        "intfloat/multilingual-e5-small": GenericPrefixIngestor,
+        "BAAI/bge-small-en-v1.5": GenericPrefixIngestor,
+        "mixedbread-ai/mxbai-embed-large-v1": GenericPrefixIngestor,
+        "Qwen/Qwen3-Embedding-0.6B": GenericPrefixIngestor
     }
 
     ingestor_class = INGESTOR_MAP.get(model_name)

@@ -7,9 +7,33 @@
             "data_path": "data/sample_products.json"
         },
         {
-            "name": "multilingual_e5",
+            "name": "multilingual_e5_base",
             "ingestion_config": "configs/ingestion_e5_ml.json",
             "query_config": "configs/query_e5_ml.json",
+            "data_path": "data/sample_products.json"
+        },
+        {
+            "name": "multilingual_e5_small",
+            "ingestion_config": "configs/ingestion_e5_small.json",
+            "query_config": "configs/query_e5_small.json",
+            "data_path": "data/sample_products.json"
+        },
+        {
+            "name": "bge_small_en",
+            "ingestion_config": "configs/ingestion_bge_small.json",
+            "query_config": "configs/query_bge_small.json",
+            "data_path": "data/sample_products.json"
+        },
+        {
+            "name": "mxbai_large",
+            "ingestion_config": "configs/ingestion_mxbai_large.json",
+            "query_config": "configs/query_mxbai_large.json",
+            "data_path": "data/sample_products.json"
+        },
+        {
+            "name": "qwen3_0.6b",
+            "ingestion_config": "configs/ingestion_qwen3.json",
+            "query_config": "configs/query_qwen3.json",
             "data_path": "data/sample_products.json"
         }
     ]

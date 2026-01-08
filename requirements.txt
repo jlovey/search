@@ -5,5 +5,8 @@ scikit-learn
 numpy
 pandas
 sentence-transformers
+transformers
+accelerate
+einops
 tqdm
 pytest

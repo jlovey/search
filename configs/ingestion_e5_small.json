@@ -1,0 +1,22 @@
+{
+    "collection_name": "prd_e5_small_bm25_tfidf",
+    "dense_model": "intfloat/multilingual-e5-small",
+    "dense_prefix": "passage: ",
+    "vector_size": 384,
+    "dense_keys": [
+        "features",
+        "productName",
+        "productDescription",
+        "categoryNames",
+        "productCode",
+        "ageRanges",
+        "ageSuitability"
+    ],
+    "sparse_keys": [
+        "productName",
+        "productCode",
+        "categoryNames"
+    ],
+    "sparse_model": "bm25_tfidf",
+    "response_keys": "all"
+}

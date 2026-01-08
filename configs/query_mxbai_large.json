@@ -1,0 +1,26 @@
+{
+    "collection_name": "prd_mxbai_large_bm25_tfidf",
+    "dense_model": "mixedbread-ai/mxbai-embed-large-v1",
+    "sparse_model_path": "models/sparse_model.pkl",
+    "dense_prefix": "Represent this sentence for searching relevant passages: ",
+    "queries": [
+        {
+            "name": "pure_dense_search",
+            "type": "dense",
+            "query_text": "Monopoly game for kids",
+            "limit": 5
+        },
+        {
+            "name": "pure_sparse_search",
+            "type": "sparse",
+            "query_text": "Hasbro Monopoly",
+            "limit": 5
+        },
+        {
+            "name": "hybrid_search",
+            "type": "hybrid",
+            "query_text": "board games for 4 years old",
+            "limit": 5
+        }
+    ]
+}

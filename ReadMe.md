@@ -44,20 +44,19 @@ The system uses a dedicated `EnrichmentService` to prepare data for vectorizatio
 ```text
 search/
 ├── configs/                     # Centralized Model & Query Configurations
-│   ├── ingestion_minilm.json    # MiniLM Specific Ingestion Settings
-│   ├── query_minilm.json        # MiniLM Specific Query Scenarios (Dense, Sparse, Hybrid)
-│   ├── ingestion_e5_ml.json     # Multilingual E5 Ingestion Settings
-│   ├── query_e5_ml.json         # Multilingual E5 Query Scenarios
-│   └── templates/               # Reusable config templates for new models
+│   ├── ingestion_minilm.json    # MiniLM Settings
+│   ├── ingestion_e5_small.json  # E5 Small Settings
+│   ├── ingestion_bge_small.json # BGE Small Settings
+│   ├── ingestion_mxbai_large.json # MXBAI Settings
+│   ├── ingestion_qwen3.json     # Qwen3 Settings
+│   └── ...                      # Corresponding query configs
 ├── pipelines/                   # Core Logic & Orchestration
 │   ├── ingestion/               
 │   │   ├── models/              # Model-specific Indexing Logic
-│   │   │   └── product_ingestors.py
-│   │   └── ingestion_orchestrator.py # Entry point for data indexing
+│   │   └── ingestion_orchestrator.py
 │   └── retrieval/               
-│       ├── models/              # Model-specific Search & Reranking Logic
-│       │   └── product_retrievers.py
-│       ├── retrieval_orchestrator.py # Entry point for search execution
+│       ├── models/              # Model-specific Search Logic
+│       └── retrieval_orchestrator.py
 │       └── cleanup_collection.py     # Utility to purge Qdrant collections
 ├── src/                         # Shared Application Core
 │   ├── services/                
@@ -116,54 +115,25 @@ Delete the collection when finished.
 python pipelines/retrieval/cleanup_collection.py
 ```
 
-### 4. Testing
-We provide 5 dedicated test scenarios to verify different parts of the pipeline using `pytest`.
+### Testing
 
-#### Run All Suites
-Execute the complete lifecycle for all configured models (MiniLM and E5).
+Tests are now organized by model folders. Each folder contains three standardized test scripts:
+- `test_full_cycle.py`: Purge → Index → Search → Cleanup.
+- `test_ingest_only.py`: Purge → Index.
+- `test_query_only.py`: Search existing collection.
+
+To run tests for a specific model (e.g., Qwen3):
 ```bash
-pytest -v -s tests/scripts/full_test_cycle.py
+pytest -v -s tests/scripts/qwen3/test_full_cycle.py
 ```
 
-#### Model-Specific Full Cycles
-Verify a full scenario (Purge → Index → Search → Cleanup) for a single model.
-```bash
-# MiniLM + BM25
-pytest -v -s tests/scripts/test_mini_lm_full_cycle.py
-
-# Multilingual E5 + BM25
-pytest -v -s tests/scripts/test_e5_ml_full_cycle.py
-```
-
-#### Persistent Tests (No Cleanup)
-Index and Query but skip the final deletion. Use this to inspect the data in Qdrant afterward.
-```bash
-# Keep MiniLM data
-pytest -v -s tests/scripts/test_mini_lm_no_cleanup.py
-
-# Keep E5 data
-pytest -v -s tests/scripts/test_e5_ml_no_cleanup.py
-```
-
-#### Ingestion-Only (Purge + Index)
-Index data into Qdrant but skip the query and cleanup phases.
-```bash
-# MiniLM
-pytest -v -s tests/scripts/test_mini_lm_ingest_only.py
-
-# E5 ML
-pytest -v -s tests/scripts/test_e5_ml_ingest_only.py
-```
-
-#### Query-Only (Search Existing)
-Execute search scenarios against an already existing collection.
-```bash
-# MiniLM
-pytest -v -s tests/scripts/test_mini_lm_query_only.py
-
-# E5 ML
-pytest -v -s tests/scripts/test_e5_ml_query_only.py
-```
+### Supported Models
+The system is pre-configured for:
+1.  **Qwen3-Embedding-0.6B**: High-performance semantic model with 32k context.
+2.  **BAAI/bge-small-en-v1.5**: Best-in-class small English model.
+3.  **mixedbread-ai/mxbai-embed-large-v1**: State-of-the-art accuracy.
+4.  **intfloat/multilingual-e5-small**: Lightweight multilingual support.
+5.  **all-MiniLM-L6-v2**: Standard baseline for performance.
 
 ## Configuration
 - `configs/ingestion_minilm.json`: Ingestion config for MiniLM model.

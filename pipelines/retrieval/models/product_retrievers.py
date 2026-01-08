@@ -137,8 +137,9 @@ class BaseRetriever:
             
             return self.reciprocal_rank_fusion(dense_hits, sparse_hits, limit=limit)
 
-class MiniLMRetriever(BaseRetriever):
-    pass
-
-class E5MLRetriever(BaseRetriever):
+class GenericRetriever(BaseRetriever):
+    """
+    A generic retriever that handles dense, sparse, and hybrid search.
+    Logic is inherited from BaseRetriever.
+    """
     pass

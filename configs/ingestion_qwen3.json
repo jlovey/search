@@ -1,0 +1,22 @@
+{
+    "collection_name": "prd_qwen3_0.6b_bm25_tfidf",
+    "dense_model": "Qwen/Qwen3-Embedding-0.6B",
+    "dense_prefix": "query: ",
+    "vector_size": 1024,
+    "dense_keys": [
+        "features",
+        "productName",
+        "productDescription",
+        "categoryNames",
+        "productCode",
+        "ageRanges",
+        "ageSuitability"
+    ],
+    "sparse_keys": [
+        "productName",
+        "productCode",
+        "categoryNames"
+    ],
+    "sparse_model": "bm25_tfidf",
+    "response_keys": "all"
+}

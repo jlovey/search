@@ -1,0 +1,22 @@
+{
+    "collection_name": "prd_bge_small_bm25_tfidf",
+    "dense_model": "BAAI/bge-small-en-v1.5",
+    "dense_prefix": "",
+    "vector_size": 384,
+    "dense_keys": [
+        "features",
+        "productName",
+        "productDescription",
+        "categoryNames",
+        "productCode",
+        "ageRanges",
+        "ageSuitability"
+    ],
+    "sparse_keys": [
+        "productName",
+        "productCode",
+        "categoryNames"
+    ],
+    "sparse_model": "bm25_tfidf",
+    "response_keys": "all"
+}

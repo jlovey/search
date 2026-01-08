@@ -106,17 +106,20 @@ class MiniLMIngestor(BaseIngestor):
             ))
         return dense_points, sparse_points
 
-class E5MLIngestor(BaseIngestor):
+class GenericPrefixIngestor(BaseIngestor):
     def prepare_points(self, products):
         dense_points = []
         sparse_points = []
-        prefix = self.config.get("dense_prefix", "passage: ")
-        for i, product in enumerate(tqdm(products, desc="Vectorizing E5-ML")):
+        # Get prefix from config, default to empty string if not provided
+        prefix = self.config.get("dense_prefix", "")
+        model_name = self.config.get("dense_model", "Generic")
+        
+        for i, product in enumerate(tqdm(products, desc=f"Vectorizing {model_name}")):
             pid = str(product.get("id", i))
             dense_content = EnrichmentService.enrich_dense(product, self.config["dense_keys"])
             sparse_content = EnrichmentService.enrich_sparse(product, self.config["sparse_keys"])
             
-            # E5 Logic: Use prefix
+            # Use prefix if provided
             dense_vec = self.embedder.get_dense_embeddings([dense_content], prefix=prefix)[0]
             sparse_vec = self.embedder.get_sparse_embeddings([sparse_content])[0]
             
