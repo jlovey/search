@@ -47,7 +47,7 @@ class QdrantHelper:
         return f"Collection '{collection_name}' deleted successfully."
 
     def load_config(self, config_path):
-        with open(config_path, 'r') as f:
+        with open(config_path, 'r', encoding='utf-8') as f:
             return json.load(f)
 
     def load_json_data(self, data_path):
@@ -55,9 +55,9 @@ class QdrantHelper:
             all_data = []
             for filename in os.listdir(data_path):
                 if filename.endswith('.json'):
-                    with open(os.path.join(data_path, filename), 'r') as f:
+                    with open(os.path.join(data_path, filename), 'r', encoding='utf-8') as f:
                         all_data.extend(json.load(f))
             return all_data
         else:
-            with open(data_path, 'r') as f:
+            with open(data_path, 'r', encoding='utf-8') as f:
                 return json.load(f)

@@ -8,7 +8,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
 from pipelines.ingestion.models.product_ingestors import MiniLMIngestor, E5MLIngestor
 
 def run_ingestion(data_path, config_path):
-    with open(config_path, 'r') as f:
+    with open(config_path, 'r', encoding='utf-8') as f:
         config = json.load(f)
     
     model_name = config.get("dense_model", "")

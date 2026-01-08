@@ -11,7 +11,7 @@ from pipelines.retrieval.cleanup_collection import run_cleanup
 
 def load_e5_config():
     config_path = "tests/configs/test_runtime_config.json"
-    with open(config_path, "r") as f:
+    with open(config_path, "r", encoding="utf-8") as f:
         config = json.load(f)
     return [s for s in config["test_suites"] if s["name"] == "multilingual_e5"]
 

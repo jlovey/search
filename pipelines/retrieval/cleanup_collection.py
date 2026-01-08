@@ -12,7 +12,7 @@ def run_cleanup(config_path):
         print(f"Error: Config file {config_path} not found.")
         return
 
-    with open(config_path, 'r') as f:
+    with open(config_path, 'r', encoding='utf-8') as f:
         config = json.load(f)
     
     collection_name = config.get("collection_name")

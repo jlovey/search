@@ -11,6 +11,7 @@ This project implements a professional, full-fledged search application using Qd
 - **Score Normalization**: All search results (Dense, Sparse, Hybrid) are normalized to a consistent `[0, 1]` range for easy comparison.
 - **Enrichment Engine**: Modular preparation for dense (Markdown) and sparse (flattened) vectors.
 - **Folder Ingestion**: Supports both single JSON files and directories containing multiple JSON files, with automated cross-file sparse model fitting.
+- **UTF-8 Compliance**: Guaranteed thread-safe, cross-platform string handling by enforcing UTF-8 encoding across all file I/O operations.
 
 ## Scoring & Normalization
 

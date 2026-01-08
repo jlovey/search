@@ -46,7 +46,7 @@ class BaseIngestor:
         # Aggregate all products to fit sparse model and then prepare points
         all_products = []
         for file_path in json_files:
-            with open(file_path, 'r') as f:
+            with open(file_path, 'r', encoding='utf-8') as f:
                 products = json.load(f)
                 if isinstance(products, list):
                     all_products.extend(products)

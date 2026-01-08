@@ -12,8 +12,9 @@ from pipelines.retrieval.cleanup_collection import run_cleanup
 
 def load_test_config():
     config_path = "tests/configs/test_runtime_config.json"
-    with open(config_path, "r") as f:
-        return json.load(f)
+    with open(config_path, "r", encoding="utf-8") as f:
+        config = json.load(f)
+        return config
 
 @pytest.mark.parametrize("suite", load_test_config()["test_suites"])
 def test_full_pipeline(suite):
