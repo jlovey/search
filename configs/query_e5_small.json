@@ -1,8 +1,8 @@
 {
     "collection_name": "prd_e5_small_bm25_tfidf",
     "dense_model": "intfloat/multilingual-e5-small",
-    "sparse_model_path": "models/sparse_model.pkl",
     "dense_prefix": "query: ",
+    "sparse_model_path": "models/sparse_model.pkl",
     "queries": [
         {
             "name": "pure_dense_search",
@@ -20,6 +20,33 @@
             "name": "hybrid_search",
             "type": "hybrid",
             "query_text": "board games for 4 years old",
+            "limit": 5,
+            "hybrid_config": {
+                "dense_weight": 0.5,
+                "sparse_weight": 0.5
+            }
+        },
+        {
+            "name": "filtered_hybrid_search",
+            "type": "hybrid",
+            "query_text": "toy games",
+            "filter": {
+                "must": [
+                    {
+                        "key": "brands",
+                        "match": {
+                            "value": "Monopoly"
+                        }
+                    }
+                ]
+            },
+            "limit": 3
+        },
+        {
+            "name": "threshold_dense_search",
+            "type": "dense",
+            "query_text": "Monopoly game for kids",
+            "score_threshold": 0.8,
             "limit": 5
         }
     ]

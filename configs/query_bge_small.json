@@ -21,6 +21,29 @@
             "type": "hybrid",
             "query_text": "board games for 4 years old",
             "limit": 5
+        },
+        {
+            "name": "filtered_hybrid_search",
+            "type": "hybrid",
+            "query_text": "toy games",
+            "filter": {
+                "must": [
+                    {
+                        "key": "brands",
+                        "match": {
+                            "value": "Monopoly"
+                        }
+                    }
+                ]
+            },
+            "limit": 3
+        },
+        {
+            "name": "threshold_dense_search",
+            "type": "dense",
+            "query_text": "Monopoly game for kids",
+            "score_threshold": 0.8,
+            "limit": 5
         }
     ]
 }

@@ -2,6 +2,7 @@ import json
 import pytest
 import os
 import sys
+import time
 
 # Add project root to sys.path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
@@ -16,6 +17,9 @@ def load_config():
 
 @pytest.mark.parametrize("suite", load_config())
 def test_query_only(suite):
-    print(f"\nRunning query-only test: {{suite[name]}}")
+    print(f"\nRunning query-only test: {{suite['name']}}")
     query_cfg = suite["query_config"]
+    
+    start_time = time.time()
     run_retrieval(query_cfg)
+    print(f"Queries for {{suite['name']}} took: {{time.time() - start_time:.2f}}s")

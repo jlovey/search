@@ -2,6 +2,7 @@ import json
 import pytest
 import os
 import sys
+import time
 
 # Add project root to sys.path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))))
@@ -17,9 +18,12 @@ def load_config():
 
 @pytest.mark.parametrize("suite", load_config())
 def test_ingest_only(suite):
-    print(f"\nRunning ingest-only test: {{suite[name]}}")
+    print(f"\nRunning ingest-only test: {{suite['name']}}")
     ingestion_cfg = suite["ingestion_config"]
     data_path = suite["data_path"]
 
     run_cleanup(ingestion_cfg)
+    
+    start_time = time.time()
     run_ingestion(data_path, ingestion_cfg)
+    print(f"Ingestion for {{suite['name']}} took: {{time.time() - start_time:.2f}}s")
