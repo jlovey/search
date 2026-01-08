@@ -22,7 +22,7 @@ def test_mini_lm_pipeline_no_cleanup(suite):
     
     ingestion_cfg = suite["ingestion_config"]
     query_cfg = suite["query_config"]
-    data_file = suite["data_file"]
+    data_path = suite["data_path"]
 
     # 1. Cleanup (ensure clean state before starting)
     print(f"Purging existing collection if any...")
@@ -30,7 +30,7 @@ def test_mini_lm_pipeline_no_cleanup(suite):
 
     # 2. Ingestion
     print(f"Running ingestion with {ingestion_cfg}...")
-    run_ingestion(data_file, ingestion_cfg)
+    run_ingestion(data_path, ingestion_cfg)
 
     # 3. Retrieval
     print(f"Running retrieval with {query_cfg}...")

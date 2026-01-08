@@ -7,7 +7,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
 
 from pipelines.ingestion.models.product_ingestors import MiniLMIngestor, E5MLIngestor
 
-def run_ingestion(data_file, config_path):
+def run_ingestion(data_path, config_path):
     with open(config_path, 'r') as f:
         config = json.load(f)
     
@@ -28,9 +28,9 @@ def run_ingestion(data_file, config_path):
         print(f"Warning: No specialized ingestor for '{model_name}'. Using MiniLMIngestor as base.")
         ingestor = MiniLMIngestor(config)
     
-    ingestor.run(data_file)
+    ingestor.run(data_path)
 
 if __name__ == "__main__":
-    data_file = "data/sample_products.json"
+    data_path = "data/sample_products.json"
     config_file = "configs/ingestion_minilm.json"
-    run_ingestion(data_file, config_file)
+    run_ingestion(data_path, config_file)

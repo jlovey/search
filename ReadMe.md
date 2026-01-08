@@ -10,6 +10,7 @@ This project implements a professional, full-fledged search application using Qd
 - **RRF Fusion**: Intelligently merges results from different retrieval methods.
 - **Score Normalization**: All search results (Dense, Sparse, Hybrid) are normalized to a consistent `[0, 1]` range for easy comparison.
 - **Enrichment Engine**: Modular preparation for dense (Markdown) and sparse (flattened) vectors.
+- **Folder Ingestion**: Supports both single JSON files and directories containing multiple JSON files, with automated cross-file sparse model fitting.
 
 ## Scoring & Normalization
 
@@ -141,6 +142,26 @@ pytest -v -s tests/scripts/test_mini_lm_no_cleanup.py
 
 # Keep E5 data
 pytest -v -s tests/scripts/test_e5_ml_no_cleanup.py
+```
+
+#### Ingestion-Only (Purge + Index)
+Index data into Qdrant but skip the query and cleanup phases.
+```bash
+# MiniLM
+pytest -v -s tests/scripts/test_mini_lm_ingest_only.py
+
+# E5 ML
+pytest -v -s tests/scripts/test_e5_ml_ingest_only.py
+```
+
+#### Query-Only (Search Existing)
+Execute search scenarios against an already existing collection.
+```bash
+# MiniLM
+pytest -v -s tests/scripts/test_mini_lm_query_only.py
+
+# E5 ML
+pytest -v -s tests/scripts/test_e5_ml_query_only.py
 ```
 
 ## Configuration

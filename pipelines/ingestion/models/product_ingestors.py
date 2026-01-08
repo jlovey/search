@@ -28,28 +28,52 @@ class BaseIngestor:
     def prepare_points(self, products):
         raise NotImplementedError("Subclasses must implement prepare_points")
 
-    def run(self, data_file):
-        with open(data_file, 'r') as f:
-            products = json.load(f)
+    def run(self, data_path):
+        json_files = []
+        if os.path.isfile(data_path):
+            json_files.append(data_path)
+        elif os.path.isdir(data_path):
+            for f in os.listdir(data_path):
+                if f.endswith('.json'):
+                    json_files.append(os.path.join(data_path, f))
         
-        print(f"Loaded {len(products)} products from {data_file}")
+        if not json_files:
+            print(f"No JSON files found in {data_path}")
+            return
+
+        print(f"Processing {len(json_files)} files from {data_path}...")
         
-        # Fit sparse model
-        all_text = [EnrichmentService.enrich_sparse(p, self.config["sparse_keys"]) for p in products]
+        # Aggregate all products to fit sparse model and then prepare points
+        all_products = []
+        for file_path in json_files:
+            with open(file_path, 'r') as f:
+                products = json.load(f)
+                if isinstance(products, list):
+                    all_products.extend(products)
+                else:
+                    all_products.append(products)
+        
+        print(f"Loaded {len(all_products)} products total.")
+        
+        # Fit sparse model on the entire corpus
+        print("Fitting sparse model on the entire corpus...")
+        all_text = [EnrichmentService.enrich_sparse(p, self.config["sparse_keys"]) for p in all_products]
         self.embedder.fit_sparse_model(all_text)
         self.embedder.save_sparse_model("models/sparse_model.pkl")
 
         # Create Collection
         if not self.qdrant.collection_exists(self.config["collection_name"]):
+            print(f"Creating collection: {self.config['collection_name']}")
             self.qdrant.create_collection(
                 self.config["collection_name"], 
                 {"size": self.config["vector_size"], "distance": "COSINE"},
                 {"name": "sparse-vector"}
             )
 
-        dense_points, sparse_points = self.prepare_points(products)
+        # Prepare points for all products
+        dense_points, sparse_points = self.prepare_points(all_products)
         
-        print(f"Uploading {len(dense_points)} dense and {len(sparse_points)} sparse documents...")
+        print(f"Uploading {len(dense_points)} dense and {len(sparse_points)} sparse points...")
         self.qdrant.client.upsert(self.config["collection_name"], points=dense_points)
         self.qdrant.client.upsert(self.config["collection_name"], points=sparse_points)
         print("Ingestion complete.")

@@ -7,21 +7,19 @@ import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 from pipelines.ingestion.ingestion_orchestrator import run_ingestion
-from pipelines.retrieval.retrieval_orchestrator import run_retrieval
 from pipelines.retrieval.cleanup_collection import run_cleanup
 
-def load_mini_lm_config():
+def load_e5_config():
     config_path = "tests/configs/test_runtime_config.json"
     with open(config_path, "r") as f:
         config = json.load(f)
-    return [s for s in config["test_suites"] if s["name"] == "standard_mini_lm"]
+    return [s for s in config["test_suites"] if s["name"] == "multilingual_e5"]
 
-@pytest.mark.parametrize("suite", load_mini_lm_config())
-def test_mini_lm_pipeline(suite):
-    print(f"\nRunning test suite: {suite['name']}")
+@pytest.mark.parametrize("suite", load_e5_config())
+def test_e5_ml_ingest_only(suite):
+    print(f"\nRunning Ingest-Only test suite: {suite['name']}")
     
     ingestion_cfg = suite["ingestion_config"]
-    query_cfg = suite["query_config"]
     data_path = suite["data_path"]
 
     # 1. Cleanup (ensure clean state)
@@ -32,12 +30,4 @@ def test_mini_lm_pipeline(suite):
     print(f"Running ingestion with {ingestion_cfg}...")
     run_ingestion(data_path, ingestion_cfg)
 
-    # 3. Retrieval
-    print(f"Running retrieval with {query_cfg}...")
-    run_retrieval(query_cfg)
-
-    # 4. Cleanup (leave the environment clean)
-    print(f"Cleaning up collection...")
-    run_cleanup(ingestion_cfg)
-
-    print(f"Test suite {suite['name']} passed successfully.")
+    print(f"Ingest-Only test for {suite['name']} passed successfully.")
