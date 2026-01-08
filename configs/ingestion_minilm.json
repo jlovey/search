@@ -4,17 +4,14 @@
         "features",
         "productName",
         "productDescription",
-        "categoryNames"
+        "categoryNames",
+        "productCode",
+        "ageRanges",
+        "ageSuitability"
     ],
     "sparse_keys": [
-        "features",
         "productName",
-        "productDescription",
-        "categoryNames"
-    ],
-    "filter_keys": [
-        "brands",
-        "ageRanges",
+        "productCode",
         "categoryNames"
     ],
     "dense_model": "all-MiniLM-L6-v2",
