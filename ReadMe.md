@@ -43,36 +43,24 @@ The system uses a dedicated `EnrichmentService` to prepare data for vectorizatio
 
 ```text
 search/
-├── configs/                     # Centralized Model & Query Configurations
-│   ├── ingestion_minilm.json    # MiniLM Settings
-│   ├── ingestion_e5_small.json  # E5 Small Settings
-│   ├── ingestion_bge_small.json # BGE Small Settings
-│   ├── ingestion_mxbai_large.json # MXBAI Settings
-│   ├── ingestion_qwen3.json     # Qwen3 Settings
-│   └── ...                      # Corresponding query configs
-├── pipelines/                   # Core Logic & Orchestration
-│   ├── ingestion/               
-│   │   ├── models/              # Model-specific Indexing Logic
-│   │   └── ingestion_orchestrator.py
-│   └── retrieval/               
-│       ├── models/              # Model-specific Search Logic
-│       └── retrieval_orchestrator.py
-│       └── cleanup_collection.py     # Utility to purge Qdrant collections
-├── src/                         # Shared Application Core
-│   ├── services/                
-│   │   ├── qdrant_service.py    # Low-level Qdrant Client Wrapper
-│   │   ├── enrichment_service.py # Markdown & Flattening Logic
-│   │   └── metrics_service.py   # Accuracy & Evaluation Metrics
-│   └── schema/                  # Pydantic Data Models
-├── models/                      # ML & Embedding logic
-│   ├── embedding_service.py     # Shared Vectorization logic (MiniLM, E5, TF-IDF)
-│   └── sparse_model.pkl         # Persisted TF-IDF vocabulary
-├── tests/                       # Automated Testing Suite
-│   ├── scripts/                 # Pytest scenarios (Full Cycle vs No-Cleanup)
-│   └── configs/                 # Master Test runtime configuration
-├── data/                        # Sample product datasets (JSON)
-├── ReadMe.md                    # Project Documentation
-└── requirements.txt             # Python Dependencies
+├── configs/                # JSON configurations for each model
+│   ├── ingestion_*.json    # Model-specific ingestion settings
+│   └── query_*.json        # Model-specific query scenarios
+├── data/                   # Dataset storage (Sample and Production)
+├── models/                 # Shared embedding and sparse model services
+├── pipelines/              
+│   ├── ingestion/          # Orchestrators and model-specific ingestors
+│   └── retrieval/          # Search logic and model-specific retrievers
+├── src/services/           # Core helpers (Qdrant, Enrichment, Metrics)
+├── tests/
+│   ├── configs/            # Runtime test configuration
+│   ├── results/            # Captured logs and comparison reports
+│   └── scripts/            # Comprehensive test suite
+│       ├── [model_name]/   # Full cycle, Ingest-only, Query-only per model
+│       ├── bulk_ingest_all.py # Sequential ingestion for all models
+│       └── bulk_query_all.py  # Sequential query testing for all models
+├── requirements.txt        # Project dependencies
+└── ReadMe.md               # You are here
 ```
 
 ### **Core Component Descriptions**
@@ -95,49 +83,50 @@ search/
    pip install -r requirements.txt
    ```
 
-## Usage
+## Usage & Bulk Operations
 
-### 1. Ingestion
-Process products and index them into Qdrant using the model-specific ingestors.
+The system is designed for high-throughput evaluation. You can process single models or the entire suite.
+
+### 1. Bulk Benchmarking (Production)
+Run the entire pipeline across all 6 models with performance tracking:
 ```bash
-python pipelines/ingestion/ingestion_orchestrator.py
+# Sequential ingestion for all models
+python tests/scripts/bulk_ingest_all.py
+
+# Sequential query testing for all models (with Avg Query Latency)
+python tests/scripts/bulk_query_all.py
 ```
 
-### 2. Retrieval
-Execute queries using the model-specific retrievers.
-```bash
-python pipelines/retrieval/retrieval_orchestrator.py
-```
-
-### 3. Cleanup
-Delete the collection when finished.
-```bash
-python pipelines/retrieval/cleanup_collection.py
-```
-
-### Testing
-
-Tests are now organized by model folders. Each folder contains three standardized test scripts:
+### 2. Standardized Testing
+Each model has a dedicated test suite under `tests/scripts/[model_name]/`:
 - `test_full_cycle.py`: Purge → Index → Search → Cleanup.
 - `test_ingest_only.py`: Purge → Index.
 - `test_query_only.py`: Search existing collection.
 
-To run tests for a specific model (e.g., Qwen3):
+To run model-specific tests:
 ```bash
 pytest -v -s tests/scripts/qwen3/test_full_cycle.py
 ```
 
-### Supported Models
-The system is pre-configured for:
-1.  **Qwen3-Embedding-0.6B**: High-performance semantic model with 32k context.
-2.  **BAAI/bge-small-en-v1.5**: Best-in-class small English model.
-3.  **mixedbread-ai/mxbai-embed-large-v1**: State-of-the-art accuracy.
-4.  **intfloat/multilingual-e5-small**: Lightweight multilingual support.
-5.  **all-MiniLM-L6-v2**: Standard baseline for performance.
+## Performance & Comparison Analysis
+
+The project provides automated tools to analyze model performance:
+
+1.  **Time Tracking**: Every test script captures **Suite Time** and **Average Latency** (per-query).
+2.  **Rank Comparison**: Running `bulk_query_all.py` allows for generating side-by-side position analysis reports in `tests/results/model_comparison.md`.
+
+## Supported Models
+
+1.  **Qwen3-Embedding-0.6B**: High-performance instruction-based model.
+2.  **BAAI/bge-small-en-v1.5**: Best-in-class accuracy for size.
+3.  **mixedbread-ai/mxbai-embed-large-v1**: Premium dense retrieval.
+4.  **intfloat/multilingual-e5-base**: Deep multilingual semantic support.
+5.  **intfloat/multilingual-e5-small**: Lightweight multilingual support.
+6.  **all-MiniLM-L6-v2**: Standard high-speed baseline.
 
 ## Configuration
-- `configs/ingestion_minilm.json`: Ingestion config for MiniLM model.
-- `configs/query_minilm.json`: Query config for MiniLM model.
-- `configs/ingestion_e5_ml.json`: Ingestion config for Multilingual E5 model.
-- `configs/query_e5_ml.json`: Query config for Multilingual E5 model.
-- `tests/configs/test_runtime_config.json`: Master configuration for automated tests.
+
+All system behavior is controlled via JSON in `configs/`:
+- `ingestion_*.json`: Controls vector dimensions, prefixes, and enrichment keys.
+- `query_*.json`: Defines search types, filters, and similarity thresholds.
+- `tests/configs/test_runtime_config.json`: Master switch for toggling between Sample and Production datasets.
