@@ -60,3 +60,7 @@ data/benchmark_data.json
 .cache/
 
 duplicate_ids.txt
+
+# Temp configs
+configs/temp*/
+tests/results/

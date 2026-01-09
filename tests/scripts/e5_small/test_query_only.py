@@ -21,5 +21,5 @@ def test_query_only(suite):
     query_cfg = suite["query_config"]
     
     start_time = time.time()
-    run_retrieval(query_cfg)
+    results = run_retrieval(query_cfg)
     print(f"Queries for {{suite['name']}} took: {{time.time() - start_time:.2f}}s")

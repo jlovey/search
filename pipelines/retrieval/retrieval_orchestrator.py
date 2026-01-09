@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+import time
 
 # Add project root to path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -33,10 +34,21 @@ def run_retrieval(config_path):
     
     print(f"\n--- Running Retrieval Pipelines for Collection: {config['collection_name']} ---")
     
+    all_results = []
     for q_config in config["queries"]:
         print(f"Executing: {q_config['name']} (Type: {q_config['type']})")
+        start_time = time.time()
         results = retriever.search(q_config)
+        duration = time.time() - start_time
         
+        query_results = {
+            "query_name": q_config["name"],
+            "query_text": q_config.get("query_text", ""),
+            "type": q_config["type"],
+            "results": [],
+            "duration": duration
+        }
+
         for r in results:
             # Shared identifiers
             pid = r.get('product_id') or r.get('original_id')
@@ -46,10 +58,21 @@ def run_retrieval(config_path):
             
             label = "RRF" if q_config["type"] == "hybrid" else "Sim"
             print(f" - [{pid}] {pname} (Score: {score:.4f}, Raw {label}: {raw:.4f})")
+            
+            query_results["results"].append({
+                "product_id": pid,
+                "product_name": pname,
+                "score": score,
+                "raw_score": raw
+            })
+        
+        all_results.append(query_results)
         
         if not results:
             print(" - No results found.")
         print("-" * 30)
+    
+    return all_results
 
 if __name__ == "__main__":
     config_file = "configs/query_minilm.json"

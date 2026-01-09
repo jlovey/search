@@ -34,8 +34,7 @@ def test_full_pipeline(suite):
 
     # 3. Retrieval
     print(f"Running retrieval with {query_cfg}...")
-    # Capturing stdout isn't strictly necessary for the test logic but we want to ensure it doesn't crash
-    run_retrieval(query_cfg)
+    results = run_retrieval(query_cfg)
 
     # 4. Cleanup (leave the environment clean)
     print(f"Cleaning up collection...")

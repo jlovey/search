@@ -36,7 +36,7 @@ def test_full_cycle(suite):
     
     print("Step 3: Retrieval")
     start_query = time.time()
-    run_retrieval(query_cfg)
+    results = run_retrieval(query_cfg)
     print(f"Retrieval took: {{time.time() - start_query:.2f}}s")
     
     print("Step 4: Cleanup")
